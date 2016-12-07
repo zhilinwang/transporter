@@ -7,9 +7,8 @@ Transporter
 
 Build
 -----
-make sure godep is installed, `go get github.com/tools/godep` and then build with
-`godep restore`
-`godep go build -a ./cmd/...`
+***NOTE*** as of 1.2.0, transporter uses the built-in go vendoring
+`go build ./cmd/...`
 
 
 Configure
@@ -78,9 +77,7 @@ Complete beginners guide
     - `cd $GOPATH; mkdir src pkg bin`
     - create the github.com path and compose `mkdir -p src/github.com/compose; cd src/github.com/compose`
     - clone transporter `git clone https://github.com/compose/transporter; cd transporter`
-    - make sure godep is installed, `go get github.com/tools/godep`
-    - run `godep restore` to get all the dependencies as specified in `Godeps.json`
-    - now you can build with `godep go build -a ./cmd/...`
+    - now you can build with `go build ./cmd/...`
 
 At this point you should be able to run transporter via `$GOPATH/bin/transporter`,  you may need to add $GOPATH to your PATH environment variable. Something along the lines of `export PATH="$GOPATH/bin:$PATH"` should work.
 
