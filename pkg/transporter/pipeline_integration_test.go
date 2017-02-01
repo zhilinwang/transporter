@@ -2,6 +2,7 @@ package transporter
 
 import (
 	"os"
+	"path/filepath"
 	"reflect"
 	"testing"
 	"time"
@@ -50,8 +51,9 @@ func TestFileToFile(t *testing.T) {
 		t.Skip("skipping FileToFile in short mode")
 	}
 	var (
-		inFile  = "/tmp/crapIn"
-		outFile = "/tmp/crapOut"
+		tempDir = os.TempDir()
+		inFile  = filepath.Join(tempDir, "in")
+		outFile = filepath.Join(tempDir, "out")
 	)
 
 	setupFiles(inFile, outFile)
@@ -77,11 +79,27 @@ func TestFileToFile(t *testing.T) {
 	p.Stop()
 
 	// compare the files
-	sourceFile, _ := os.Open(outFile)
-	sourceSize, _ := sourceFile.Stat()
+	sourceFile, err := os.Open(outFile)
+	if err != nil {
+		t.Errorf("error opening source file %s, got %v", outFile, err)
+		t.FailNow()
+	}
+	sourceSize, err := sourceFile.Stat()
+	if err != nil {
+		t.Errorf("error statting source file %s, got %v", outFile, err)
+		t.FailNow()
+	}
 	defer sourceFile.Close()
-	sinkFile, _ := os.Open(inFile)
-	sinkSize, _ := sinkFile.Stat()
+	sinkFile, err := os.Open(inFile)
+	if err != nil {
+		t.Errorf("error opening sink file %s, got %v", inFile, err)
+		t.FailNow()
+	}
+	sinkSize, err := sinkFile.Stat()
+	if err != nil {
+		t.Errorf("error statting sink file %s, got %v", inFile, err)
+		t.FailNow()
+	}
 	defer sinkFile.Close()
 
 	if sourceSize.Size() == 0 || sourceSize.Size() != sinkSize.Size() {
