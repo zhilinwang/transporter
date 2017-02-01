@@ -16,7 +16,7 @@ var (
 	_ client.Reader = &Reader{}
 )
 
-// Reader implements the behavior defined by client.Reader for interfacing with MongoDB.
+// Reader implements the behavior defined by client.Reader for interfacing with the file.
 type Reader struct{}
 
 func newReader() client.Reader {

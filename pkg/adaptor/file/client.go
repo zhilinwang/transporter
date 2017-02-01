@@ -43,7 +43,7 @@ func NewClient(options ...ClientOptionFunc) (*Client, error) {
 	return c, nil
 }
 
-// WithURI defines the full connection string of the MongoDB database.
+// WithURI defines the full path to the file, prefixed with file://, or stdout://
 func WithURI(uri string) ClientOptionFunc {
 	return func(c *Client) error {
 		c.uri = uri
@@ -51,7 +51,7 @@ func WithURI(uri string) ClientOptionFunc {
 	}
 }
 
-// Connect tests the mongodb connection and initializes the mongo session
+// Connect initializes the file for IO
 func (c *Client) Connect() (client.Session, error) {
 	if c.file == nil {
 		if err := c.initFile(); err != nil {
