@@ -36,9 +36,9 @@ type Connectable interface {
 	Connect() error
 }
 
-// Clientable defines the interface that adaptors should follow to have their client
+// Clienter defines the interface that adaptors should follow to have their client
 // exposed to the pipeline, allowing for graceful closing of clients.
-type Clientable interface {
+type Clienter interface {
 	Client() client.Client
 }
 

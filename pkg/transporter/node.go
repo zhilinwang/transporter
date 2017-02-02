@@ -143,10 +143,10 @@ func (n *Node) Init(interval time.Duration) (err error) {
 // Stop this node's adaptor, and sends a stop to each child of this node
 func (n *Node) Stop() {
 	n.adaptor.Stop()
-	// Ideally, all adaptors will be clientable in the future, so this check
+	// Ideally, all adaptors will be "clientable" in the future, so this check
 	// will be unnecessary
-	if a, ok := n.adaptor.(adaptor.Clientable); ok {
-		if c, ok := a.Client().(client.Closeable); ok {
+	if a, ok := n.adaptor.(adaptor.Clienter); ok {
+		if c, ok := a.Client().(client.Closer); ok {
 			c.Close()
 		}
 	}
