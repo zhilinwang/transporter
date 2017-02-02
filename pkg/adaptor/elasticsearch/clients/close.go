@@ -14,7 +14,9 @@ func Close(done chan struct{}, wg *sync.WaitGroup, s client.Session) {
 		select {
 		case <-done:
 			log.Debugln("received done channel")
-			s.Close()
+			if c, ok := s.(client.Closeable); ok {
+				c.Close()
+			}
 			wg.Done()
 			return
 		}

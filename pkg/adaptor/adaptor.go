@@ -6,6 +6,7 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/compose/transporter/pkg/client"
 	"github.com/compose/transporter/pkg/pipe"
 )
 
@@ -33,6 +34,12 @@ type Adaptor interface {
 // Connect() allows the adaptor an opportunity to setup connections prior to Start()
 type Connectable interface {
 	Connect() error
+}
+
+// Clientable defines the interface that adaptors should follow to have their client
+// exposed to the pipeline, allowing for graceful closing of clients.
+type Clientable interface {
+	Client() client.Client
 }
 
 // Describable defines the interface that all database connectors and nodes must follow in order to support

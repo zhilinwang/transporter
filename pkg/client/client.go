@@ -10,6 +10,10 @@ type NsFilterFunc func(string) bool
 
 // Session represents the connection to the underlying service.
 type Session interface {
+}
+
+// Closeable provides a standard interface for closing a client or session
+type Closeable interface {
 	Close()
 }
 
@@ -40,6 +44,8 @@ func sessionFunc(client Client, op func(Session) error) error {
 	if err != nil {
 		return err
 	}
-	defer sess.Close()
+	if s, ok := sess.(Closeable); ok {
+		defer s.Close()
+	}
 	return op(sess)
 }

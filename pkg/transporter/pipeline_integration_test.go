@@ -26,6 +26,8 @@ func setupFiles(in, out string) {
 	fh, _ := os.Create(out)
 	defer fh.Close()
 	fh.WriteString("{\"_id\":\"546656989330a846dc7ce327\",\"test\":\"hello world\"}\n")
+	fh.WriteString("{\"_id\":\"546656989330a846dc7ce328\",\"test\":\"hello world 2\"}\n")
+
 }
 
 // set up local mongo

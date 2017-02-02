@@ -12,8 +12,3 @@ type Session struct {
 }
 
 var _ client.Session = &Session{}
-
-// Close implements necessary calls to cleanup the underlying file
-func (s *Session) Close() {
-	s.file.Close()
-}

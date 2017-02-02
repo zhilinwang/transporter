@@ -61,6 +61,13 @@ func (c *Client) Connect() (client.Session, error) {
 	return &Session{c.file}, nil
 }
 
+// Close closes the underlying file
+func (c *Client) Close() {
+	if c.file != nil {
+		c.file.Close()
+	}
+}
+
 func (c *Client) initFile() error {
 	if strings.HasPrefix(c.uri, "stdout://") {
 		c.file = os.Stdout

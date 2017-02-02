@@ -74,8 +74,3 @@ func (w *Writer) Write(msg message.Msg) func(client.Session) error {
 		return err
 	}
 }
-
-// Close is called by clients.Close() when it receives on the done channel.
-func (w *Writer) Close() {
-	// no op
-}
