@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"net/http"
 	"os"
-	"sync"
 	"testing"
 	"time"
 
 	"github.com/compose/transporter/pkg/adaptor/elasticsearch/clients"
+	"github.com/compose/transporter/pkg/client"
 	"github.com/compose/transporter/pkg/log"
 	"github.com/compose/transporter/pkg/message"
 	"github.com/compose/transporter/pkg/message/ops"
@@ -18,6 +18,7 @@ import (
 const (
 	defaultURL   = "http://127.0.0.1:9200"
 	defaultIndex = "test_v2"
+	testType     = "test"
 )
 
 var (
@@ -26,10 +27,6 @@ var (
 
 func fullURL(suffix string) string {
 	return fmt.Sprintf("%s/%s%s", testURL, defaultIndex, suffix)
-}
-
-func testNS() string {
-	return fmt.Sprintf("%s.%s", defaultIndex, "test")
 }
 
 func setup() error {
@@ -69,21 +66,19 @@ type countResponse struct {
 }
 
 func TestWriter(t *testing.T) {
-	done := make(chan struct{})
-	var wg sync.WaitGroup
 	opts := &clients.ClientOptions{
 		URLs:       []string{testURL},
 		HTTPClient: http.DefaultClient,
 		Path:       defaultIndex,
+		Index:      defaultIndex,
 	}
 	vc := clients.Clients["v2"]
-	w, _ := vc.Creator(done, &wg, opts)
-	w.Write(message.From(ops.Insert, testNS(), map[string]interface{}{"hello": "world"}))(nil)
-	w.Write(message.From(ops.Insert, testNS(), map[string]interface{}{"_id": "booya", "hello": "world"}))(nil)
-	w.Write(message.From(ops.Update, testNS(), map[string]interface{}{"_id": "booya", "hello": "goodbye"}))(nil)
-	w.Write(message.From(ops.Delete, testNS(), map[string]interface{}{"_id": "booya", "hello": "goodbye"}))(nil)
-	close(done)
-	wg.Wait()
+	w, _ := vc.Creator(opts)
+	w.Write(message.From(ops.Insert, testType, map[string]interface{}{"hello": "world"}))(nil)
+	w.Write(message.From(ops.Insert, testType, map[string]interface{}{"_id": "booya", "hello": "world"}))(nil)
+	w.Write(message.From(ops.Update, testType, map[string]interface{}{"_id": "booya", "hello": "goodbye"}))(nil)
+	w.Write(message.From(ops.Delete, testType, map[string]interface{}{"_id": "booya", "hello": "goodbye"}))(nil)
+	w.(client.Closer).Close()
 
 	if _, err := http.Get(fullURL("/_refresh")); err != nil {
 		t.Fatalf("_refresh request failed, %s", err)

@@ -9,7 +9,6 @@ import (
 	"net/url"
 	"regexp"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/compose/transporter/pkg/adaptor"
@@ -71,15 +70,6 @@ func (e VersionError) Error() string {
 	return fmt.Sprintf("%s running %s, %s", e.uri, e.v, e.err)
 }
 
-// InvalidTimeoutError wraps the underlying error when the provided is not parsable time.ParseDuration
-// type InvalidTimeoutError struct {
-// 	timeout string
-// }
-//
-// func (e InvalidTimeoutError) Error() string {
-// 	return fmt.Sprintf("Invalid Timeout, %s", e.timeout)
-// }
-
 // Elasticsearch is an adaptor to connect a pipeline to
 // an elasticsearch cluster.
 type Elasticsearch struct {
@@ -90,9 +80,6 @@ type Elasticsearch struct {
 
 	pipe *pipe.Pipe
 	path string
-
-	doneChannel chan struct{}
-	wg          sync.WaitGroup
 }
 
 // Description for the Elasticsearcb adaptor
@@ -117,9 +104,8 @@ func init() {
 		log.With("path", path).Debugf("adaptor config: %+v", conf)
 
 		e := &Elasticsearch{
-			pipe:        p,
-			path:        path,
-			doneChannel: make(chan struct{}),
+			pipe: p,
+			path: path,
 		}
 
 		e.index, e.typeMatch, err = extra.CompileNamespace()
@@ -156,30 +142,26 @@ func (e *Elasticsearch) Stop() error {
 	log.With("path", e.path).Infoln("adaptor Stopping...")
 	e.pipe.Stop()
 
-	close(e.doneChannel)
-	e.wg.Wait()
+	if c, ok := e.client.(client.Closer); ok {
+		c.Close()
+	}
 
 	log.With("path", e.path).Infoln("adaptor Stopped")
 	return nil
 }
 
 func (e *Elasticsearch) applyOp(msg message.Msg) (message.Msg, error) {
-	_, msgColl, _ := message.SplitNamespace(msg)
 	msgCopy := make(map[string]interface{})
 	// Copy from the original map to the target map
 	for key, value := range msg.Data() {
 		msgCopy[key] = value
 	}
-	err := e.client.Write(message.From(msg.OP(), e.computeNamespace(msgColl), msgCopy))(nil)
+	err := e.client.Write(message.From(msg.OP(), msg.Namespace(), msgCopy))(nil)
 
 	if err != nil {
 		e.pipe.Err <- adaptor.NewError(adaptor.ERROR, e.path, fmt.Sprintf("write message error (%s)", err), msg.Data)
 	}
 	return msg, err
-}
-
-func (e *Elasticsearch) computeNamespace(Type string) string {
-	return fmt.Sprintf("%s.%s", e.index, Type)
 }
 
 func (e *Elasticsearch) setupClient(conf Config) error {
@@ -221,8 +203,9 @@ func (e *Elasticsearch) setupClient(conf Config) error {
 				UserInfo:   uri.User,
 				HTTPClient: httpClient,
 				Path:       e.path,
+				Index:      e.index,
 			}
-			versionedClient, _ := vc.Creator(e.doneChannel, &e.wg, opts)
+			versionedClient, _ := vc.Creator(opts)
 			e.client = versionedClient
 			return nil
 		}

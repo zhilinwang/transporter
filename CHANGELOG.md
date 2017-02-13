@@ -1,3 +1,13 @@
+## v0.1.3 [2017-02-09]
+
+### Breaking changes:
+- namespace processing no longer expects their the be a "db" portion (i.e. "database.collection")
+but an attempt to maintain backwards compatibility is still there for the time being.
+[#258](https://github.com/compose/transporter/pull/258)
+
+### Bugfixes
+- [#261](https://github.com/compose/transporter/pull/261): return a nil message to get skipped in the pipeline
+
 ## v0.1.2 [2017-01-27]
 
 This release is primarily aimed at getting the MongoDB and Elasticsearch adaptors into a
