@@ -107,8 +107,7 @@ func (f *File) Listen() error {
 }
 
 func (f *File) applyOp(msg message.Msg) (message.Msg, error) {
-	_, msgColl, _ := message.SplitNamespace(msg)
-	err := client.Write(f.client, f.writer, message.From(msg.OP(), msgColl, msg.Data()))
+	err := client.Write(f.client, f.writer, message.From(msg.OP(), msg.Namespace(), msg.Data()))
 	if err != nil {
 		f.pipe.Err <- adaptor.NewError(adaptor.ERROR, f.path, fmt.Sprintf("write message error (%s)", err), msg.Data())
 	}
