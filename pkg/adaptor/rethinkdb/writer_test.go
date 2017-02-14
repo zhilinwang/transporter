@@ -5,10 +5,10 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/compose/transporter/pkg/log"
 	"github.com/compose/transporter/pkg/message"
 	"github.com/compose/transporter/pkg/message/data"
 	"github.com/compose/transporter/pkg/message/ops"
-	"github.com/coreos/fleet/log"
 
 	r "gopkg.in/gorethink/gorethink.v3"
 )
