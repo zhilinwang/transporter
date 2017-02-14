@@ -31,6 +31,7 @@ services:
   - postgresql
 addons:
   postgresql: '9.4'
+  rethinkdb: '2.3.5'
   apt:
     packages:
       - oracle-java8-set-default
@@ -49,6 +50,10 @@ before_script:
   - cp -r config/mongodb/certs/* /tmp/mongodb/
   - mongo-orchestration start -p 20000 -b 127.0.0.1
   - ./scripts/setup_mongodb.sh
+  - mkdir -p /tmp/rethinkdb
+  - cp -r config/rethinkdb/certs/* /tmp/rethinkdb/
+  - rethinkdb --config-file ./config/rethinkdb/configurations/ssl.conf >& &
+  - rethinkdb --initial-password admin123 --config-file ./config/rethinkdb/configurations/auth.conf >& &
 after_script:
   - mongo-orchestration stop
 install: true

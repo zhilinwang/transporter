@@ -9,7 +9,6 @@ import (
 
 	"github.com/compose/transporter/pkg/client"
 	"github.com/compose/transporter/pkg/log"
-	"github.com/compose/transporter/pkg/message"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 )
@@ -96,7 +95,6 @@ type Client struct {
 	tail           bool
 
 	mgoSession *mgo.Session
-	bulkWriter chan message.Msg
 }
 
 // NewClient creates a new client to work with MongoDB.
@@ -121,7 +119,6 @@ func NewClient(options ...ClientOptionFunc) (*Client, error) {
 		safety:         DefaultSafety,
 		tlsConfig:      nil,
 		tail:           false,
-		bulkWriter:     nil,
 	}
 
 	// Run the options on it

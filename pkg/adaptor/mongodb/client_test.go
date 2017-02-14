@@ -8,6 +8,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/compose/transporter/pkg/client"
+
 	mgo "gopkg.in/mgo.v2"
 )
 
@@ -352,9 +354,12 @@ func TestConnect(t *testing.T) {
 		t.Skip("skipping Connect in short mode")
 	}
 	for _, ct := range connectTests {
-		_, err := ct.client.Connect()
+		s, err := ct.client.Connect()
 		if err != ct.expectedErr {
 			t.Fatalf("[%s] unexpected Connect error, expected %+v, got %+v\n", ct.name, ct.expectedErr, err)
+		}
+		if err != nil {
+			s.(client.Closer).Close()
 		}
 	}
 }
