@@ -12,6 +12,26 @@ import (
 	"github.com/compose/transporter/pkg/pipe"
 )
 
+const (
+	sampleConfig = `
+	- rethink:
+	    type: rethinkdb
+	    uri: rethink://127.0.0.1:28015
+	`
+
+	description = "a rethinkdb adaptor that functions as both a source and a sink"
+)
+
+// Config provides custom configuration options for the RethinkDB adapter
+type Config struct {
+	URI       string   `json:"uri" doc:"the uri to connect to, in the form rethink://user:password@host.example:28015/database"`
+	Namespace string   `json:"namespace" doc:"rethink namespace to read/write"`
+	SSL       bool     `json:"ssl" doc:"enable TLS connection"`
+	CACerts   []string `json:"cacerts" doc:"array of root CAs to use in order to verify the server certificates"`
+	Timeout   string   `json:"timeout" doc:"timeout for establishing connection, format must be parsable by time.ParseDuration and defaults to 10s"`
+	Tail      bool     `json:"tail" doc:"if true, the RethinkDB table will be monitored for changes after copying the namespace"`
+}
+
 // RethinkDB is an adaptor that writes metrics to rethinkdb (http://rethinkdb.com/)
 // An open-source distributed database
 type RethinkDB struct {
@@ -25,22 +45,6 @@ type RethinkDB struct {
 
 	doneChannel chan struct{}
 	wg          sync.WaitGroup
-}
-
-// Description for rethinkdb adaptor
-func (r *RethinkDB) Description() string {
-	return "a rethinkdb adaptor that functions as both a source and a sink"
-}
-
-const sampleConfig = `
-- rethink:
-    type: rethinkdb
-    uri: rethink://127.0.0.1:28015
-`
-
-// SampleConfig for rethinkdb adaptor
-func (r *RethinkDB) SampleConfig() string {
-	return sampleConfig
 }
 
 func init() {
@@ -84,20 +88,20 @@ func init() {
 	})
 }
 
+// Description for rethinkdb adaptor
+func (r *RethinkDB) Description() string {
+	return description
+}
+
+// SampleConfig for rethinkdb adaptor
+func (r *RethinkDB) SampleConfig() string {
+	return sampleConfig
+}
+
 // Connect tests the connection and if successful, connects to the database
 func (r *RethinkDB) Connect() error {
 	_, err := r.client.Connect()
 	return err
-}
-
-// Config provides custom configuration options for the RethinkDB adapter
-type Config struct {
-	URI       string   `json:"uri" doc:"the uri to connect to, in the form rethink://user:password@host.example:28015/database"`
-	Namespace string   `json:"namespace" doc:"rethink namespace to read/write"`
-	SSL       bool     `json:"ssl" doc:"enable TLS connection"`
-	CACerts   []string `json:"cacerts" doc:"array of root CAs to use in order to verify the server certificates"`
-	Timeout   string   `json:"timeout" doc:"timeout for establishing connection, format must be parsable by time.ParseDuration and defaults to 10s"`
-	Tail      bool     `json:"tail" doc:"if true, the RethinkDB table will be monitored for changes after copying the namespace"`
 }
 
 // Start the adaptor as a source
@@ -122,21 +126,6 @@ func (r *RethinkDB) Start() error {
 
 	log.With("path", r.path).Infoln("adaptor Start finished...")
 	return nil
-}
-
-func (r *RethinkDB) tableFilter(table string) bool {
-	return r.tableMatch.MatchString(table)
-}
-
-// prepareDocument moves the `id` field to the `_id` field, which is more
-// commonly used by downstream sinks. A transformer could be used to do the
-// same thing, but because transformers are not run for Delete messages, we
-// must do it here.
-func prepareDocument(doc map[string]interface{}) map[string]interface{} {
-	doc["_id"] = doc["id"]
-	delete(doc, "id")
-
-	return doc
 }
 
 // Listen start's the adaptor's listener
@@ -164,4 +153,19 @@ func (r *RethinkDB) Stop() error {
 func (r *RethinkDB) applyOp(msg message.Msg) (message.Msg, error) {
 	m, err := message.Exec(message.MustUseAdaptor("rethinkdb"), msg)
 	return m, err
+}
+
+func (r *RethinkDB) tableFilter(table string) bool {
+	return r.tableMatch.MatchString(table)
+}
+
+// prepareDocument moves the `id` field to the `_id` field, which is more
+// commonly used by downstream sinks. A transformer could be used to do the
+// same thing, but because transformers are not run for Delete messages, we
+// must do it here.
+func prepareDocument(doc map[string]interface{}) map[string]interface{} {
+	doc["_id"] = doc["id"]
+	delete(doc, "id")
+
+	return doc
 }
