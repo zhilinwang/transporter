@@ -28,6 +28,7 @@ after_success:
 services:
   - docker
   - postgresql
+  - rethinkdb
 addons:
   postgresql: '9.4'
   rethinkdb: '2.3.5'

@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"net/url"
+	"regexp"
 	"strings"
 	"time"
 
@@ -32,6 +33,8 @@ const (
 var (
 	_ client.Client = &Client{}
 	_ client.Closer = &Client{}
+
+	rethinkDbVersionMatcher = regexp.MustCompile(`\d+\.\d+(\.\d+)?`)
 )
 
 // InvalidURIError wraps the underlying error when the provided URI is not parsable by mgo.
@@ -317,7 +320,12 @@ func (c *Client) assertServerVersion() error {
 		return VersionError{c.uri, serverStatus.Process.Version, "could not determine the RethinkDB server version: process.version key missing"}
 	}
 
-	v, err := version.NewVersion(strings.Split(serverStatus.Process.Version, " ")[1])
+	versionString := rethinkDbVersionMatcher.FindString(strings.Split(serverStatus.Process.Version, " ")[1])
+	if versionString == "" {
+		return VersionError{c.uri, serverStatus.Process.Version, "malformed version string"}
+	}
+
+	v, err := version.NewVersion(versionString)
 	if err != nil {
 		return VersionError{c.uri, serverStatus.Process.Version, err.Error()}
 	}
