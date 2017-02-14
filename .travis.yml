@@ -52,7 +52,9 @@ before_script:
   - ./scripts/setup_mongodb.sh
   - mkdir -p /tmp/rethinkdb
   - cp -r config/rethinkdb/certs/* /tmp/rethinkdb/
+  - mkdir -p /tmp/rethinkdb_ssl
   - rethinkdb --config-file ./config/rethinkdb/configurations/ssl.conf >& /dev/null &
+  - mkdir -p /tmp/rethinkdb_auth
   - rethinkdb --initial-password admin123 --config-file ./config/rethinkdb/configurations/auth.conf >& /dev/null &
 after_script:
   - mongo-orchestration stop
