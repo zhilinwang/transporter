@@ -247,10 +247,10 @@ var (
 		{
 			"timeout connect",
 			&Client{
-				uri:            "rethinkdb://localhost:37017",
+				uri:            "rethinkdb://127.0.0.1:37017",
 				sessionTimeout: 2 * time.Second,
 			},
-			ConnectError{"gorethink: dial tcp [::1]:37017: getsockopt: connection refused"},
+			ConnectError{"gorethink: dial tcp 127.0.0.1:37017: getsockopt: connection refused"},
 		},
 		{
 			"authenticated connect",

@@ -118,7 +118,7 @@ func (r *Reader) iterateTable(session *re.Session, in <-chan string, out chan<- 
 					return
 				}
 				log.With("db", r.db).With("table", t).Infoln("iterating...")
-				cursor, err := re.Table(t).Run(session)
+				cursor, err := re.DB(r.db).Table(t).Run(session)
 				if err != nil {
 					return
 				}
@@ -126,7 +126,7 @@ func (r *Reader) iterateTable(session *re.Session, in <-chan string, out chan<- 
 				var ccursor *re.Cursor
 				if r.tail {
 					var err error
-					ccursor, err = re.Table(t).Changes(re.ChangesOpts{}).Run(session)
+					ccursor, err = re.DB(r.db).Table(t).Changes(re.ChangesOpts{}).Run(session)
 					if err != nil {
 						return
 					}
