@@ -53,7 +53,7 @@ before_script:
   - mkdir -p /tmp/rethinkdb
   - cp -r config/rethinkdb/certs/* /tmp/rethinkdb/
   - rethinkdb --config-file ./config/rethinkdb/configurations/ssl.conf >& &
-  - rethinkdb --initial-password admin123 --config-file ./config/rethinkdb/configurations/auth.conf >& &
+  - rethinkdb --initial-password admin123 --config-file ./config/rethinkdb/configurations/auth.conf &
 after_script:
   - mongo-orchestration stop
 install: true
