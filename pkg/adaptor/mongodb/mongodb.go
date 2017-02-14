@@ -21,6 +21,13 @@ const (
 	- localmongo:
 	    type: mongodb
 	    uri: mongodb://127.0.0.1:27017/test
+      # timeout: 30s
+      # tail: false
+      # ssl: false
+      # cacerts: ["/path/to/cert.pem"]
+      # wc: 1
+      # fsync: false
+      # bulk: false
 	`
 )
 

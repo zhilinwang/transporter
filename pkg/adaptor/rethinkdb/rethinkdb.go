@@ -17,6 +17,10 @@ const (
 	- rethink:
 	    type: rethinkdb
 	    uri: rethink://127.0.0.1:28015
+			# timeout: 30s
+      # tail: false
+      # ssl: false
+      # cacerts: ["/path/to/cert.pem"]
 	`
 
 	description = "a rethinkdb adaptor that functions as both a source and a sink"
@@ -26,10 +30,10 @@ const (
 type Config struct {
 	URI       string   `json:"uri" doc:"the uri to connect to, in the form rethink://user:password@host.example:28015/database"`
 	Namespace string   `json:"namespace" doc:"rethink namespace to read/write"`
-	SSL       bool     `json:"ssl" doc:"enable TLS connection"`
-	CACerts   []string `json:"cacerts" doc:"array of root CAs to use in order to verify the server certificates"`
 	Timeout   string   `json:"timeout" doc:"timeout for establishing connection, format must be parsable by time.ParseDuration and defaults to 10s"`
 	Tail      bool     `json:"tail" doc:"if true, the RethinkDB table will be monitored for changes after copying the namespace"`
+	SSL       bool     `json:"ssl" doc:"enable TLS connection"`
+	CACerts   []string `json:"cacerts" doc:"array of root CAs to use in order to verify the server certificates"`
 }
 
 // RethinkDB is an adaptor that writes metrics to rethinkdb (http://rethinkdb.com/)
@@ -80,6 +84,9 @@ func init() {
 		r.client, err = NewClient(
 			WithURI(conf.URI),
 			WithDatabase(db),
+			WithSessionTimeout(conf.Timeout),
+			WithSSL(conf.SSL),
+			WithCACerts(conf.CACerts),
 		)
 		if err != nil {
 			return nil, err

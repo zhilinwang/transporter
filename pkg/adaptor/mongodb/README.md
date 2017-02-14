@@ -8,11 +8,11 @@ receiving data for inserts.
 - mongodb:
     type: mongo
     uri: mongodb://127.0.0.1:27017/test
-#   timeout: 30s # defaults to 10s
-#   tail: false
-#   ssl: false
-#   cacerts: ["/path/to/cert.pem"]
-#   wc: 1
-#   fsync: false
-#   bulk: false # only used when acting as a sink
+    # timeout: 30s
+    # tail: false
+    # ssl: false
+    # cacerts: ["/path/to/cert.pem"]
+    # wc: 1
+    # fsync: false
+    # bulk: false
 ```
