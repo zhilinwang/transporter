@@ -9,6 +9,56 @@ import (
 	"time"
 )
 
+var errorTests = []struct {
+	name     string
+	expected string
+	e        error
+}{
+	{
+		"InvalidURIError",
+		"Invalid URI (blah), blah",
+		InvalidURIError{"blah", "blah"},
+	},
+	{
+		"InvalidTimeoutError",
+		"Invalid Timeout, 10",
+		InvalidTimeoutError{"10"},
+	},
+	{
+		"InvalidCertError",
+		"failed to parse root certificate",
+		InvalidCertError{true},
+	},
+	{
+		"InvalidCertError with version",
+		"invalid cert error",
+		InvalidCertError{},
+	},
+	{
+		"ConnectError with timeout",
+		"connection error, no reachable servers",
+		ConnectError{"no reachable servers"},
+	},
+	{
+		"VersionError",
+		"unable to determine version from rethinkdb://localhost:28105, its bad",
+		VersionError{"rethinkdb://localhost:28105", "", "its bad"},
+	},
+	{
+		"VersionError with version",
+		"rethinkdb://localhost:28105 running 0.9.2, its bad",
+		VersionError{"rethinkdb://localhost:28105", "0.9.2", "its bad"},
+	},
+}
+
+func TestErrors(t *testing.T) {
+	for _, et := range errorTests {
+		if et.e.Error() != et.expected {
+			t.Errorf("[%s] wrong Error(), expected %s, got %s", et.name, et.expected, et.e.Error())
+		}
+	}
+}
+
 const rootPEM = `
 -----BEGIN CERTIFICATE-----
 MIIEBDCCAuygAwIBAgIDAjppMA0GCSqGSIb3DQEBBQUAMEIxCzAJBgNVBAYTAlVT

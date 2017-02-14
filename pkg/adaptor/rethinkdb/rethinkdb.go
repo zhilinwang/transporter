@@ -37,6 +37,7 @@ type Config struct {
 type RethinkDB struct {
 	client client.Client
 	reader client.Reader
+	writer client.Writer
 
 	tableMatch *regexp.Regexp
 
@@ -58,7 +59,7 @@ func init() {
 		}
 
 		if conf.URI == "" || conf.Namespace == "" {
-			return nil, fmt.Errorf("both uri and namespace required, but missing ")
+			return nil, fmt.Errorf("both uri and namespace required, but missing")
 		}
 		log.With("path", path).Debugf("adaptor config: %+v", conf)
 
@@ -151,8 +152,12 @@ func (r *RethinkDB) Stop() error {
 
 // applyOp applies one operation to the database
 func (r *RethinkDB) applyOp(msg message.Msg) (message.Msg, error) {
-	m, err := message.Exec(message.MustUseAdaptor("rethinkdb"), msg)
-	return m, err
+	err := client.Write(r.client, r.writer, message.From(msg.OP(), msg.Namespace(), msg.Data()))
+
+	if err != nil {
+		r.pipe.Err <- adaptor.NewError(adaptor.ERROR, r.path, fmt.Sprintf("write message error (%s)", err), msg.Data)
+	}
+	return msg, err
 }
 
 func (r *RethinkDB) tableFilter(table string) bool {

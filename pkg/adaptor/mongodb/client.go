@@ -230,7 +230,9 @@ func (c *Client) Connect() (client.Session, error) {
 
 // Close satisfies the Closer interface and handles closing the initial mgo.Session.
 func (c Client) Close() {
-	c.mgoSession.Close()
+	if c.mgoSession != nil {
+		c.mgoSession.Close()
+	}
 }
 
 func (c *Client) initConnection() error {
