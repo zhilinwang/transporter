@@ -9,7 +9,6 @@ env:
     - ES_V5_URL=http://127.0.0.1:9205
     - ES_V2_URL=http://127.0.0.1:9202
     - ES_V1_URL=http://127.0.0.1:9201
-    - EASYRSA_VARS_FILE=$HOME/gopath/src/github.com/compose/transporter/scripts/vars
 before_install:
   - go get github.com/mattn/goveralls
   - pip install "mongo-orchestration>=0.6.7,<1.0"
@@ -52,8 +51,8 @@ before_script:
   - ./scripts/setup_mongodb.sh
   - mkdir -p /tmp/rethinkdb
   - cp -r config/rethinkdb/certs/* /tmp/rethinkdb/
-  - rethinkdb --config-file ./config/rethinkdb/configurations/ssl.conf >& &
-  - rethinkdb --initial-password admin123 --config-file ./config/rethinkdb/configurations/auth.conf &
+  - rethinkdb --config-file ./config/rethinkdb/configurations/ssl.conf >& /dev/null &
+  - rethinkdb --initial-password admin123 --config-file ./config/rethinkdb/configurations/auth.conf >& /dev/null &
 after_script:
   - mongo-orchestration stop
 install: true
