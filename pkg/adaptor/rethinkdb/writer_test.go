@@ -97,6 +97,7 @@ func TestInsert(t *testing.T) {
 		if err != nil {
 			t.Errorf("unable to determine collection count, %s\n", err)
 		}
+		defer countResp.Close()
 		var count int
 		countResp.One(&count)
 		if count != it.docCount {
@@ -109,6 +110,7 @@ func TestInsert(t *testing.T) {
 			if err != nil {
 				t.Fatalf("unexpected Get error, %s\n", err)
 			}
+			defer cursor.Close()
 			cursor.One(&result)
 			if !reflect.DeepEqual(lastDoc.AsMap(), result) {
 				t.Errorf("mismatched document, expected %+v (%T), got %+v (%T)\n", lastDoc.AsMap(), lastDoc.AsMap(), result, result)
@@ -164,6 +166,7 @@ func TestUpdate(t *testing.T) {
 		if err != nil {
 			t.Fatalf("unexpected Get error, %s\n", err)
 		}
+		defer cursor.Close()
 		cursor.One(&result)
 		if !reflect.DeepEqual(expectedDoc, result) {
 			t.Errorf("mismatched document, expected %+v (%T), got %+v (%T)\n", expectedDoc, expectedDoc, result, result)
@@ -208,6 +211,7 @@ func TestDelete(t *testing.T) {
 		// Validate delete
 		var result interface{}
 		resp, _ := r.DB(writerTestData.DB).Table(dt.table).Get(dt.id).Run(defaultSession.session)
+		defer resp.Close()
 		resp.One(&result)
 		if result != nil {
 			t.Errorf("unexpected result returned, expected nil, got %T\n", result)

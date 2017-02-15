@@ -93,6 +93,7 @@ func (r *Reader) listTables(session *re.Session, filterFn func(name string) bool
 
 	go func() {
 		defer close(out)
+		defer tables.Close()
 		var table string
 		for tables.Next(&table) {
 			if filterFn(table) {
