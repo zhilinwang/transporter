@@ -170,14 +170,3 @@ func (r *RethinkDB) applyOp(msg message.Msg) (message.Msg, error) {
 func (r *RethinkDB) tableFilter(table string) bool {
 	return r.tableMatch.MatchString(table)
 }
-
-// prepareDocument moves the `id` field to the `_id` field, which is more
-// commonly used by downstream sinks. A transformer could be used to do the
-// same thing, but because transformers are not run for Delete messages, we
-// must do it here.
-// func prepareDocument(doc map[string]interface{}) map[string]interface{} {
-// 	doc["_id"] = doc["id"]
-// 	delete(doc, "id")
-//
-// 	return doc
-// }
