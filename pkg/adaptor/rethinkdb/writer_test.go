@@ -95,11 +95,11 @@ func TestInsert(t *testing.T) {
 		}
 		countResp, err := r.DB(writerTestData.DB).Table(it.table).Count().Run(defaultSession.session)
 		if err != nil {
-			t.Errorf("unable to determine collection count, %s\n", err)
+			t.Errorf("unable to determine table count, %s\n", err)
 		}
-		defer countResp.Close()
 		var count int
 		countResp.One(&count)
+		countResp.Close()
 		if count != it.docCount {
 			t.Errorf("mismatched doc count, expected %d, got %d\n", it.docCount, count)
 		}
@@ -110,8 +110,8 @@ func TestInsert(t *testing.T) {
 			if err != nil {
 				t.Fatalf("unexpected Get error, %s\n", err)
 			}
-			defer cursor.Close()
 			cursor.One(&result)
+			cursor.Close()
 			if !reflect.DeepEqual(lastDoc.AsMap(), result) {
 				t.Errorf("mismatched document, expected %+v (%T), got %+v (%T)\n", lastDoc.AsMap(), lastDoc.AsMap(), result, result)
 			}
@@ -166,8 +166,8 @@ func TestUpdate(t *testing.T) {
 		if err != nil {
 			t.Fatalf("unexpected Get error, %s\n", err)
 		}
-		defer cursor.Close()
 		cursor.One(&result)
+		cursor.Close()
 		if !reflect.DeepEqual(expectedDoc, result) {
 			t.Errorf("mismatched document, expected %+v (%T), got %+v (%T)\n", expectedDoc, expectedDoc, result, result)
 		}
@@ -209,12 +209,23 @@ func TestDelete(t *testing.T) {
 			t.Errorf("unexpected Delete error, %s\n", err)
 		}
 		// Validate delete
-		var result interface{}
-		resp, _ := r.DB(writerTestData.DB).Table(dt.table).Get(dt.id).Run(defaultSession.session)
-		defer resp.Close()
-		resp.One(&result)
+		var result map[string]interface{}
+		cursor, _ := r.DB(writerTestData.DB).Table(dt.table).Get(dt.id).Run(defaultSession.session)
+		cursor.One(&result)
+		cursor.Close()
 		if result != nil {
-			t.Errorf("unexpected result returned, expected nil, got %T\n", result)
+			t.Errorf("unexpected result returned, expected nil, got %+v\n", result)
+		}
+
+		countCursor, err := r.DB(writerTestData.DB).Table(dt.table).Count().Run(defaultSession.session)
+		if err != nil {
+			t.Errorf("unable to determine table count, %s\n", err)
+		}
+		var count int
+		countCursor.One(&count)
+		countCursor.Close()
+		if count != 0 {
+			t.Errorf("mismatched doc count, expected 0, got %d\n", count)
 		}
 	}
 }

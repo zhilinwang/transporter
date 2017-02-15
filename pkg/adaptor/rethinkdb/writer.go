@@ -49,15 +49,24 @@ func msgTable(db string, msg message.Msg, s client.Session) (r.Term, *r.Session)
 }
 
 func insertMsg(msg message.Msg, t r.Term, s *r.Session) error {
-	return do(t.Insert(msg.Data(), r.InsertOpts{Conflict: "replace"}), s)
+	return do(t.Insert(prepareDocument(msg.Data()), r.InsertOpts{Conflict: "replace"}), s)
 }
 
 func updateMsg(msg message.Msg, t r.Term, s *r.Session) error {
-	return do(t.Insert(msg.Data(), r.InsertOpts{Conflict: "replace"}), s)
+	return do(t.Insert(prepareDocument(msg.Data()), r.InsertOpts{Conflict: "replace"}), s)
 }
 
 func deleteMsg(msg message.Msg, t r.Term, s *r.Session) error {
-	return do(t.Get(msg.ID()).Delete(), s)
+	return do(t.Get(prepareDocument(msg.Data())["id"]).Delete(), s)
+}
+
+// prepareDocument checks for an `_id` field and moves it to `id`.
+func prepareDocument(doc map[string]interface{}) map[string]interface{} {
+	if id, ok := doc["_id"]; ok {
+		doc["id"] = id
+		delete(doc, "_id")
+	}
+	return doc
 }
 
 func do(t r.Term, s *r.Session) error {

@@ -175,9 +175,9 @@ func (r *RethinkDB) tableFilter(table string) bool {
 // commonly used by downstream sinks. A transformer could be used to do the
 // same thing, but because transformers are not run for Delete messages, we
 // must do it here.
-func prepareDocument(doc map[string]interface{}) map[string]interface{} {
-	doc["_id"] = doc["id"]
-	delete(doc, "id")
-
-	return doc
-}
+// func prepareDocument(doc map[string]interface{}) map[string]interface{} {
+// 	doc["_id"] = doc["id"]
+// 	delete(doc, "id")
+//
+// 	return doc
+// }

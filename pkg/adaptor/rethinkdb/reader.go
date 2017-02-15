@@ -71,12 +71,7 @@ func (r *Reader) Read(filterFn client.NsFilterFunc) client.MessageChanFunc {
 				}
 			}()
 			log.With("db", r.db).Infoln("Read completed")
-			go func() {
-				select {
-				case <-done:
-					return
-				}
-			}()
+			// this will block if we're tailing
 			wg.Wait()
 			return
 		}()
@@ -135,7 +130,7 @@ func (r *Reader) iterateTable(session *re.Session, in <-chan string, out chan<- 
 
 				var result map[string]interface{}
 				for cursor.Next(&result) {
-					out <- message.From(ops.Insert, t, prepareDocument(result))
+					out <- message.From(ops.Insert, t, result)
 					result = map[string]interface{}{}
 				}
 
@@ -185,11 +180,11 @@ func (r *Reader) sendChanges(table string, ccursor *re.Cursor, out chan<- messag
 				if change.Error != "" {
 					errc <- errors.New(change.Error)
 				} else if change.OldVal != nil && change.NewVal != nil {
-					out <- message.From(ops.Update, table, prepareDocument(change.NewVal))
+					out <- message.From(ops.Update, table, change.NewVal)
 				} else if change.NewVal != nil {
-					out <- message.From(ops.Insert, table, prepareDocument(change.NewVal))
+					out <- message.From(ops.Insert, table, change.NewVal)
 				} else if change.OldVal != nil {
-					out <- message.From(ops.Delete, table, prepareDocument(change.OldVal))
+					out <- message.From(ops.Delete, table, change.OldVal)
 				}
 			}
 		}
